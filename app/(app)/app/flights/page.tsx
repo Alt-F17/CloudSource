@@ -77,6 +77,7 @@ export default function FlightsPage() {
 
   const [form, setForm] = useState<FlightSearchInput>(state.flightSearch)
   const [loading, setLoading] = useState(false)
+  const [bookedItineraryIds, setBookedItineraryIds] = useState<string[]>([])
 
   const airports = Object.values(getAirportMap())
   const result = state.flightResult
@@ -111,6 +112,15 @@ export default function FlightsPage() {
 
   function field<K extends keyof FlightSearchInput>(key: K, value: FlightSearchInput[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
+  }
+
+  function markBooked(itineraryId: string, bookingUrl: string | null) {
+    setSelectedItineraryId(itineraryId)
+    setBookedItineraryIds((prev) => (prev.includes(itineraryId) ? prev : [...prev, itineraryId]))
+
+    if (bookingUrl) {
+      window.open(bookingUrl, '_blank', 'noopener,noreferrer')
+    }
   }
 
   const selectedItinerary = result?.itineraries.find((it) => it.id === selectedId) ?? null
@@ -290,6 +300,7 @@ export default function FlightsPage() {
                     .filter((value, index, array) => array.indexOf(value) === index)
                   const primaryCarrier = getPrimaryCarrier(itinerary)
                   const bookingUrl = getCarrierBookingUrl(primaryCarrier)
+                  const isBooked = bookedItineraryIds.includes(itinerary.id)
 
                   return (
                     <div
@@ -352,31 +363,42 @@ export default function FlightsPage() {
                           style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}
                         >
                           {bookingUrl ? (
-                            <a
-                              className={`btn ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
-                              style={{ padding: '6px 14px', fontSize: 12 }}
-                              href={bookingUrl}
-                              target="_blank"
-                              rel="noreferrer noopener"
+                            <button
+                              className={`btn ${isBooked ? '' : isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                              style={
+                                isBooked
+                                  ? {
+                                      padding: '6px 14px',
+                                      fontSize: 12,
+                                      background: 'rgba(148, 163, 184, 0.22)',
+                                      borderColor: 'rgba(148, 163, 184, 0.38)',
+                                      color: 'rgba(226, 232, 240, 0.9)',
+                                      cursor: 'default',
+                                    }
+                                  : { padding: '6px 14px', fontSize: 12 }
+                              }
                               onClick={(e) => {
                                 e.stopPropagation()
-                                setSelectedItineraryId(itinerary.id)
+                                if (isBooked) return
+                                markBooked(itinerary.id, bookingUrl)
                               }}
+                              disabled={isBooked}
                             >
-                              Book
-                            </a>
+                              {isBooked ? 'Booked!' : 'Book'}
+                            </button>
                           ) : (
                             <button
-                              className={`btn ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                              className={`btn ${isBooked ? '' : isSelected ? 'btn-primary' : 'btn-secondary'}`}
                               style={{ padding: '6px 14px', fontSize: 12 }}
                               onClick={(e) => {
                                 e.stopPropagation()
-                                setSelectedItineraryId(itinerary.id)
+                                if (isBooked) return
+                                markBooked(itinerary.id, bookingUrl)
                               }}
                               disabled
                               title={`No airline booking page configured for ${primaryCarrier}`}
                             >
-                              Book
+                              {isBooked ? 'Booked!' : 'Book'}
                             </button>
                           )}
                           <button
