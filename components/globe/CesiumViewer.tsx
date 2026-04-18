@@ -41,8 +41,7 @@ const AUTO_ROTATE_RESUME_DELAY_MS = 5000
 const AUTO_ROTATE_DEGREES_PER_TICK = 0.010
 const AUTO_ROTATE_BLEND_SPEED = 0.045
 
-const COUNTRY_GEOJSON_URL =
-  'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson'
+const COUNTRY_GEOJSON_URL = '/geo/world-continents.geojson'
 
 const LAND_COLOR_HEX = '#F192D7'
 const OCEAN_COLOR_HEX = '#006EAE'
@@ -187,6 +186,8 @@ export default function CesiumViewer({
     if (!containerRef.current || viewerRef.current) return
 
     const init = async () => {
+      ;(window as Window & { CESIUM_BASE_URL?: string }).CESIUM_BASE_URL = '/cesium'
+
       const Cesium = await import('cesium')
       cesiumRef.current = Cesium
 

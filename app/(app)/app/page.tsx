@@ -66,6 +66,7 @@ function cardTransform(i: number, rot: number) {
 export default function AppPage() {
   const router = useRouter()
   const { state, activeTrip, startAirport, flightDestination } = useAppState()
+  const cesiumIonToken = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN
   const rotRef = useRef(0)
   const prevIsGlobeRef = useRef<boolean | null>(null)
   const [rot, setRot] = useState(0)
@@ -304,6 +305,7 @@ export default function AppPage() {
         animate={globeAnimation}
       >
         <CesiumViewer
+          ionToken={cesiumIonToken}
           destination={globeDestination}
           startAirport={startAirport}
           focusDestination={isGlobeSelected}
