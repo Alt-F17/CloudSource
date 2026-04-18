@@ -1,180 +1,131 @@
-﻿# CloudSource
+# CloudSource
 
-CloudSource is a globe-first AI travel planning app built with Next.js, React, TypeScript, Tailwind CSS, Framer Motion, and Cesium. Instead of splitting trip planning across disconnected tabs and tools, CloudSource brings flights, destination context, budgets, notes, tasks, and AI assistance into one immersive interface.
+CloudSource is a globe-first AI travel planner built with Next.js, React, TypeScript, Tailwind CSS, Framer Motion, and Cesium. It brings destination discovery, flight planning, budgeting, notes, trip tasks, and an AI assistant into one connected interface instead of splitting travel planning across separate tools.
 
-## Overview
+## What It Does
 
-CloudSource was designed around a simple idea: travel planning feels fragmented because the context is fragmented. Booking flights happens in one place, culture research in another, budgeting in another, and personal planning in scattered notes. CloudSource treats a trip as one connected experience centered on a 3D globe and an orbiting set of planning panels.
+- centers the experience around a 3D interactive globe
+- uses an orbiting panel UI for flights, culture, hotels, budget, chat, notes, and to-dos
+- generates structured trip plans with AI
+- visualizes flight routes and airport markers on the globe
+- keeps trip state synced across the app with shared client-side state
+- includes Nimbus, an in-app travel assistant for destination-aware guidance
 
-Users can:
-- explore destinations through a globe-centered UI
-- browse an orbiting carousel of planning panels
-- search flights and view routes on the globe
-- review destination culture guidance
-- track trip budget items
-- keep notes and moodboard-style trip ideas
-- manage trip to-dos
-- use Nimbus, the built-in AI travel assistant
-- generate structured trip plans with AI
+## Stack
 
-## Core Features
-
-### Globe-first navigation
-- Cesium-powered interactive globe
-- orbiting panel carousel for main app sections
-- flight route visualization with labeled markers for start, destination, and layovers
-- destination pin focus when the globe panel is selected
-
-### Flights
-- airport-based search flow
-- itinerary selection with route breakdowns
-- budget tracking shortcut from flight results
-- booking buttons that open official airline booking pages for supported carriers
-
-### Culture guide
-- destination-specific culture cards
-- practical etiquette, dining, transit, and emergency guidance
-- expanded data for all currently supported culture destinations
-
-### Budgeting
-- configurable trip budget totals and currency
-- categorized expense tracking
-- quick add flows tied to flight selections
-
-### Notes and planning
-- trip notes and editable content
-- moodboard-style idea collection
-- trip checklist / to-do flows
-
-### AI trip generation
-- API routes for AI-powered project generation
-- structured JSON output mapped into notes, tasks, and trip state
-- Nimbus assistant for destination-aware travel help
-
-## Tech Stack
-
-### Frontend
 - Next.js 15
 - React 19
 - TypeScript
 - Tailwind CSS
 - Framer Motion
-- Lucide React
-- Keen Slider
 - Cesium
-
-### Validation and utilities
 - Zod
-- clsx
-- tailwind-merge
-
-### Tooling
-- TypeScript
-- PostCSS
-- Autoprefixer
-- Drizzle Kit
 
 ## Project Structure
 
 ```text
 app/
-  page.tsx                     Landing / entry route
-  globals.css                  Global styles
-  (app)/app/page.tsx           Main globe experience
-  (app)/app/flights/page.tsx   Flights panel
-  (app)/app/about/page.tsx     Culture guide
-  (app)/app/budget/page.tsx    Budget panel
-  (app)/app/chat/page.tsx      Nimbus chat panel
-  (app)/app/notes/page.tsx     Notes / moodboard
-  (app)/app/todo/page.tsx      Trip checklist
-  api/                         App API routes
+  page.tsx                    Landing page
+  (app)/app/page.tsx          Main globe experience
+  (app)/app/flights/page.tsx  Flights panel
+  (app)/app/about/page.tsx    Culture panel
+  (app)/app/budget/page.tsx   Budget panel
+  (app)/app/chat/page.tsx     Nimbus chat panel
+  (app)/app/notes/page.tsx    Notes panel
+  (app)/app/todo/page.tsx     Trip checklist
+  api/                        App routes for AI and flight search
 
 components/
-  app/                         Shared in-app state and panel UI
-  globe/                       Cesium viewer and globe components
-  mascot/                      Nimbus widget and assistant UI
+  app/                        Shared state and planning UI
+  globe/                      Cesium globe and carousel components
+  mascot/                     Nimbus widget
 
 lib/
-  airports.ts                  Airport lookup data
-  culture-data.ts              Culture guide dataset
-  flight-types.ts              Flight domain types
-  mock-flights.ts              Mock itinerary generation
-  panel-routes.ts              Panel route mapping
-  prompts/                     AI prompt builders
-  trip-project.ts              Generated trip payload types
-  trip-schema.ts               Schema definitions
+  airports.ts                 Airport lookup data
+  culture-data.ts             Destination culture content
+  mock-flights.ts             Mock flight search data
+  panel-routes.ts             Panel routing map
+  prompts/                    AI prompt builders
+  trip-project.ts             Generated project types
+  trip-schema.ts              Shared schemas
 
-public/cesium/                 Cesium static runtime assets
+public/cesium/                Cesium static runtime assets
 ```
 
 ## Getting Started
 
-### Prerequisites
-- Node.js 18+ recommended
-- npm
+### 1. Install
 
-### Install dependencies
 ```bash
 npm install
 ```
 
-### Start the development server
+### 2. Set up env vars
+
+Copy `.env.example` to `.env` and fill in what you need.
+
+Important variables:
+
+- `GOOGLE_AI_API_KEY`: required for AI trip generation
+- `GOOGLE_NIMBUS_MODEL`: optional override for Nimbus
+- `GOOGLE_TRIP_MODEL`: optional override for trip generation
+- `NEXT_PUBLIC_CESIUM_ION_TOKEN`: required for Cesium globe access
+- `GOOGLE_PLACES_API_KEY`: reserved for places integrations
+- `DATABASE_URL`, `AUTH_*`, `ANTHROPIC_API_KEY`: present for future or adjacent integrations
+
+### 3. Run locally
+
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000` in your browser.
+Open `http://localhost:3000`.
 
-## Available Scripts
+## Scripts
 
 ```bash
-npm run dev      # Start Next.js in development mode
-npm run build    # Build for production
-npm run start    # Start the production server
-npm run lint     # Run Next.js lint checks
-npx tsc --noEmit # Run strict TypeScript checks
+npm run dev
+npm run build
+npm run start
+npm run lint
+npx tsc --noEmit
 ```
 
-## Environment Notes
+## How It Works
 
-This project includes `.env` and `.env.example` support. If you need environment configuration, start from `.env.example` and keep secrets out of version control.
+CloudSource uses a shared app state provider to keep the active trip, flights, notes, todos, chat, budget, and destination context in sync across the globe and the panel routes.
 
-Cesium assets are expected to remain under `public/cesium/` because the globe viewer relies on those static paths.
+Current backend behavior:
 
-## Architecture Notes
-
-CloudSource uses shared client-side app state to synchronize:
-- active trip
-- flight search inputs and selected itinerary
-- budget configuration and expenses
-- culture destination context
-- notes and to-dos
-- AI-generated project data
-- Nimbus chat state
-
-That shared state is what lets the globe, flights panel, culture guide, and supporting planning tools stay in sync as the user moves through the app.
+- `app/api/trip/generate/route.ts` calls Google AI and expects structured JSON output
+- `app/api/flights/search/route.ts` currently returns mocked itinerary data
+- `app/api/nimbus/route.ts` powers the in-app assistant flow
 
 ## Current State
 
-CloudSource is a polished prototype / hackathon-style full-stack app with a strong interaction model and partial real-world integrations.
+This repo is a polished hackathon-style prototype with a strong UI and real AI integration, but not all travel data is live yet.
 
-Current implementation includes:
-- real UI flows across the planning panels
-- mock and API-backed flight search behavior
-- AI trip generation routes
-- rich in-app planning state
-- official-airline outbound booking links for supported carriers in the flights panel
+What is already working:
 
-Still likely next steps:
-- deeper live travel integrations
-- exact deep-linked flight booking flows
-- stronger persistence and collaboration features
-- more destinations and richer destination intelligence
+- globe-centered navigation
+- multi-panel trip planning flow
+- shared local app state with persistence
+- AI-generated trip scaffolding
+- mocked flight search and globe route rendering
 
-## Inspiration
+What is still likely next:
 
-CloudSource AI Travel Planner came from a frustration with how fragmented travel planning usually feels. Booking flights happens in one place, researching culture in another, budgeting somewhere else, and keeping track of ideas in scattered notes. The globe-first interface was inspired by the idea that travel is fundamentally spatial: you are not just filling out forms, you are moving through the world.
+- live flight and hotel integrations
+- stronger auth and persistence
+- collaborative planning
+- deeper destination intelligence
 
-## Why It Stands Out
+## Notes
 
-CloudSource is not just a collection of travel widgets. The globe is the center of the product, and the surrounding panels work as connected parts of one planning system. The main accomplishment of the project is turning a visually ambitious concept into a functional, stateful application where AI output, flight selection, culture info, notes, and budget tracking all reinforce each other.
+- Keep Cesium assets under `public/cesium/`; the viewer expects those paths.
+- Minimum recommended validation before shipping changes:
+
+```bash
+npm run lint
+npx tsc --noEmit
+```
