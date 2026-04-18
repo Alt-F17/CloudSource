@@ -1,0 +1,254 @@
+.wrapper {
+  width: min(100%, 760px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.scene {
+  position: relative;
+  width: min(88vw, 640px);
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(96, 165, 250, 0.22), transparent 45%),
+    radial-gradient(circle at 70% 75%, rgba(236, 72, 153, 0.22), transparent 50%),
+    rgba(6, 10, 20, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow:
+    0 25px 80px rgba(2, 6, 23, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.orbit,
+.orbitSecondary {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.orbit {
+  width: 76%;
+  height: 52%;
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  animation: spinOrbit 36s linear infinite;
+}
+
+.orbitSecondary {
+  width: 66%;
+  height: 42%;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  animation: spinOrbit 26s linear infinite reverse;
+}
+
+.globe {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 25%, #7dd3fc, #3b82f6 42%, #1d4ed8 80%, #172554 100%);
+  box-shadow:
+    0 0 0 1px rgba(219, 234, 254, 0.3),
+    0 16px 38px rgba(37, 99, 235, 0.45),
+    0 0 70px rgba(56, 189, 248, 0.35);
+  animation: globeFloat 7s ease-in-out infinite;
+}
+
+.globe::before,
+.globe::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+}
+
+.globe::before {
+  inset: 8% 12%;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(15, 118, 110, 0.82), transparent 35%),
+    radial-gradient(circle at 65% 52%, rgba(16, 185, 129, 0.85), transparent 38%),
+    radial-gradient(circle at 48% 80%, rgba(5, 150, 105, 0.75), transparent 30%);
+  filter: blur(0.2px);
+  animation: continentsDrift 16s linear infinite;
+}
+
+.globe::after {
+  inset: 4%;
+  border: 1px solid rgba(224, 242, 254, 0.28);
+}
+
+.shine {
+  position: absolute;
+  left: 18%;
+  top: 12%;
+  width: 30%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.3);
+  filter: blur(2px);
+}
+
+.card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 162px;
+  border-radius: 16px;
+  padding: 0.75rem 0.8rem;
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.72);
+  color: #e2e8f0;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.32);
+  transition:
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 300ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease;
+}
+
+.card:hover {
+  border-color: rgba(125, 211, 252, 0.88);
+}
+
+.activeCard {
+  border-color: rgba(147, 197, 253, 0.95);
+  box-shadow: 0 12px 38px rgba(14, 116, 144, 0.45);
+}
+
+.cardTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #f8fafc;
+}
+
+.cardSubTitle {
+  margin-top: 0.24rem;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.controlButton {
+  min-width: 96px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.74);
+  color: #f8fafc;
+  padding: 0.48rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: all 180ms ease;
+}
+
+.controlButton:hover {
+  border-color: rgba(125, 211, 252, 0.88);
+  transform: translateY(-1px);
+}
+
+.status {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.7);
+  color: #cbd5e1;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.caption {
+  width: min(100%, 560px);
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(15, 23, 42, 0.62);
+  padding: 0.9rem 1rem;
+}
+
+.captionTitle {
+  font-size: 1rem;
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.captionText {
+  margin-top: 0.22rem;
+  font-size: 0.88rem;
+  color: #cbd5e1;
+}
+
+@keyframes spinOrbit {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes globeFloat {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-8px);
+  }
+}
+
+@keyframes continentsDrift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(6px);
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    width: 136px;
+    padding: 0.6rem 0.65rem;
+  }
+
+  .cardTitle {
+    font-size: 0.82rem;
+  }
+
+  .cardSubTitle {
+    font-size: 0.72rem;
+  }
+
+  .controlButton {
+    min-width: 84px;
+    font-size: 0.76rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit,
+  .orbitSecondary,
+  .globe,
+  .globe::before {
+    animation: none;
+  }
+
+  .card {
+    transition: none;
+  }
+}

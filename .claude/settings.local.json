@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/felix/.claude/skills/ui-ux-pro-max/**)",
+      "Bash(python3 scripts/search.py \"travel planning AI globe immersive futuristic premium\" --design-system -p \"CloudSource\" -f markdown)",
+      "Bash(python3 scripts/search.py \"travel planning AI globe immersive futuristic premium\" --design-system -p \"CloudSource\")",
+      "Bash(uipro init *)",
+      "Bash(uipro --help)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"travel planning AI globe immersive futuristic premium agentic\" --design-system -p \"CloudSource\")",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"travel globe 3D immersive dark futuristic\" --domain style)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"travel adventure premium\" --domain color)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"globe navigation 3D interaction animation\" --domain ux)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"nextjs shadcn tailwind performance\" --stack nextjs)",
+      "WebFetch(domain:api.anthropic.com)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npm install *)",
+      "Bash(curl -sS -o /dev/null -w \"%{http_code} %{size_download}b %{time_total}s\\\\n\" http://localhost:3000/)",
+      "Bash(curl -sS -o /dev/null -w \"%{http_code} %{size_download}b %{time_total}s\\\\n\" http://localhost:3000/app)",
+      "Bash(curl -sS http://localhost:3000/app -o /tmp/app.html)",
+      "Read(//tmp/**)",
+      "Bash(curl -sS -o /dev/null -w \"%{http_code} %{size_download}b\\\\n\" http://localhost:3000/app)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/app)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" http://localhost:3000/app)",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\felix\\\\OneDrive - Dawson College\\\\Projects\\\\marihacks-IX\\\\CloudSource\\\\components\\\\globe\\\\CesiumViewer.tsx' | Select-Object -Index \\(190..205\\)\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\felix\\\\OneDrive - Dawson College\\\\Projects\\\\marihacks-IX\\\\CloudSource\\\\app\\\\globals.css' | Measure-Object -Line\")",
+      "Bash(powershell -Command '@ *)",
+      "Bash(python3 -c ' *)",
+      "Bash(python -c ' *)"
+    ]
+  }
+}

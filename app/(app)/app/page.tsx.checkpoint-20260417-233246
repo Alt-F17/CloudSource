@@ -1,0 +1,288 @@
+'use client'
+
+import dynamic from 'next/dynamic'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  ChevronLeft, ChevronRight,
+  MessageSquare, Plane, Hotel, Wallet, StickyNote, CheckSquare, Info
+} from 'lucide-react'
+
+const CesiumViewer = dynamic(() => import('@/components/globe/CesiumViewer'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center">
+      <div className="text-xs text-white/30 tracking-widest uppercase">Loading…</div>
+    </div>
+  ),
+})
+
+// ─── Panel data ────────────────────────────────────────────────────────────
+const PANELS = [
+  { key: 'chat',    label: 'Agent',      sub: 'always on',   Icon: MessageSquare, accent: '#60A5FA' },
+  { key: 'flights', label: 'Flights',    sub: 'YUL → LIS',   Icon: Plane,         accent: '#60A5FA' },
+  { key: 'hotels',  label: 'Hotels',     sub: '3 options',   Icon: Hotel,         accent: '#F472B6' },
+  { key: 'budget',  label: 'Budget',     sub: '$2,795',       Icon: Wallet,        accent: '#60A5FA' },
+  { key: 'notes',   label: 'Moodboard',  sub: '18 pins',     Icon: StickyNote,    accent: '#F472B6' },
+  { key: 'todo',    label: 'To-do',      sub: '2 done',      Icon: CheckSquare,   accent: '#60A5FA' },
+  { key: 'about',   label: 'About',      sub: 'Lisbon',      Icon: Info,          accent: '#F472B6' },
+]
+const N = PANELS.length
+const TWO_PI = 2 * Math.PI
+
+// ─── Orbit geometry ────────────────────────────────────────────────────────
+const GLOBE_Z    = 100
+const RX = 490                   // horizontal orbit radius (px)
+const RY = 240                   // vertical orbit radius
+const RZ = 210                   // depth (controls scale / blur)
+// Orbit centre sits above 50vh to account for the nav bar at the bottom
+const ORBIT_TOP  = 'calc(50% - 52px)'
+
+const CARD_W = 180
+const CARD_H = 210
+const FRONT  = Math.PI / 2      // angle that maps to the front-most position
+
+function cardAngle(i: number, rot: number) {
+  return (TWO_PI / N) * i + rot
+}
+
+function cardTransform(i: number, rot: number) {
+  const a     = cardAngle(i, rot)
+  const x     = RX * Math.cos(a)
+  const y     = RY * Math.sin(a)
+  const z     = RZ * Math.sin(a)                    // + = front, – = back
+  const depth = (z + RZ) / (2 * RZ)                // 0 … 1
+  const scale   = 0.55 + 0.45 * depth
+  const opacity = 0.22 + 0.78 * depth
+  const blur    = z < 0 ? Math.max(0, 5 * (-z / RZ)) : 0
+  // Globe sits at GLOBE_Z. Cards in front → zIndex > GLOBE_Z; behind → < GLOBE_Z
+  const zIndex  = Math.round(GLOBE_Z + z * 0.45)
+  return { x, y, z, scale, opacity, blur, zIndex }
+}
+
+// ─── Page ──────────────────────────────────────────────────────────────────
+export default function AppPage() {
+  const rotRef = useRef(0)
+  const [rot, setRot]   = useState(0)
+
+  const snapTo = useCallback((i: number) => {
+    const raw = FRONT - (TWO_PI / N) * i
+    const cur = rotRef.current
+    let delta = raw - cur
+    while (delta >  Math.PI) delta -= TWO_PI
+    while (delta < -Math.PI) delta += TWO_PI
+    rotRef.current = cur + delta
+    setRot(rotRef.current)
+  }, [])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') setRot(r => { rotRef.current = r - TWO_PI / N; return rotRef.current })
+      if (e.key === 'ArrowLeft')  setRot(r => { rotRef.current = r + TWO_PI / N; return rotRef.current })
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  const frontIdx = (() => {
+    let best = 0, bestDist = Infinity
+    for (let i = 0; i < N; i++) {
+      const a = ((cardAngle(i, rot) % TWO_PI) + TWO_PI) % TWO_PI
+      const f = ((FRONT % TWO_PI) + TWO_PI) % TWO_PI
+      const d = Math.min(Math.abs(a - f), TWO_PI - Math.abs(a - f))
+      if (d < bestDist) { bestDist = d; best = i }
+    }
+    return best
+  })()
+
+  const prev = () => setRot(r => { rotRef.current = r + TWO_PI / N; return rotRef.current })
+  const next = () => setRot(r => { rotRef.current = r - TWO_PI / N; return rotRef.current })
+
+  return (
+    <div className="relative h-screen w-screen overflow-hidden">
+
+      {/* ── Cesium fills the entire scene ── */}
+      <div className="absolute inset-0 z-0">
+        <CesiumViewer />
+      </div>
+
+      {/* ── Dark vignette so cards are readable against the globe ── */}
+      <div
+        className="pointer-events-none absolute inset-0 z-10"
+        style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.50) 100%)' }}
+      />
+
+      {/* ── Orbit scene ── */}
+      <div className="absolute inset-0 z-20" style={{ perspective: 1300 }}>
+
+        {/* Subtle orbit ring — centred at ORBIT_TOP */}
+        <div
+          className="pointer-events-none absolute"
+          style={{
+            left: '50%',
+            top: ORBIT_TOP,
+            width: RX * 2, height: RY * 2,
+            transform: 'translate(-50%, -50%)',
+            border: '1px dashed rgba(255,255,255,0.06)',
+            borderRadius: '50%',
+          }}
+        />
+
+        {/* ── Orbiting panel cards ── */}
+        {PANELS.map((panel, i) => {
+          const t = cardTransform(i, rot)
+          const isSelected = i === frontIdx
+          return (
+            <motion.div
+              key={panel.key}
+              className="absolute cursor-pointer select-none"
+              style={{
+                left: '50%',
+                top: ORBIT_TOP,
+                zIndex: t.zIndex + (isSelected ? 4 : 0),
+              }}
+              animate={{
+                x: t.x - CARD_W / 2,
+                y: t.y - CARD_H / 2,
+                scale: t.scale,
+                opacity: t.opacity,
+                filter: t.blur > 0 ? `blur(${t.blur.toFixed(1)}px)` : 'none',
+              }}
+              transition={{ type: 'spring', stiffness: 90, damping: 22, mass: 0.8 }}
+              onClick={() => snapTo(i)}
+            >
+              <PanelCard panel={panel} selected={isSelected} idx={i} total={N} />
+            </motion.div>
+          )
+        })}
+      </div>
+
+      {/* ── Top-left branding ── */}
+      <div className="absolute left-6 top-6 z-50">
+        <div className="text-lg font-bold tracking-tight">
+          <span className="text-white">Cloud</span>
+          <span style={{ background: 'linear-gradient(135deg,#60A5FA,#F472B6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Source
+          </span>
+        </div>
+      </div>
+
+      {/* ── Bottom navigation ── */}
+      <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2">
+        <button
+          onClick={prev}
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 backdrop-blur-xl transition hover:bg-white/10 active:scale-95"
+        >
+          <ChevronLeft className="h-5 w-5 text-white" />
+        </button>
+
+        <div className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3 backdrop-blur-xl">
+          <span className="text-sm font-medium text-white">{PANELS[frontIdx].label}</span>
+          <span className="text-xs text-white/40">{PANELS[frontIdx].sub}</span>
+          <div className="flex gap-1">
+            {PANELS.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => snapTo(i)}
+                className="transition"
+                style={{
+                  width:  i === frontIdx ? 20 : 6,
+                  height: 6,
+                  borderRadius: 3,
+                  background: i === frontIdx
+                    ? 'linear-gradient(90deg,#60A5FA,#F472B6)'
+                    : 'rgba(255,255,255,0.2)',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={next}
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 backdrop-blur-xl transition hover:bg-white/10 active:scale-95"
+        >
+          <ChevronRight className="h-5 w-5 text-white" />
+        </button>
+      </div>
+
+      {/* ── Enter panel CTA ── */}
+      <AnimatePresence mode="wait">
+        <motion.button
+          key={frontIdx}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+          className="absolute bottom-8 right-8 z-50 flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white active:scale-95 transition"
+          style={{ background: 'linear-gradient(135deg,#3B82F6,#EC4899)', boxShadow: '0 0 40px rgba(236,72,153,0.3)' }}
+        >
+          Enter {PANELS[frontIdx].label}
+          <span className="text-white/70">→</span>
+        </motion.button>
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ─── Panel card ────────────────────────────────────────────────────────────
+function PanelCard({
+  panel, selected, idx, total,
+}: {
+  panel: typeof PANELS[number]
+  selected: boolean
+  idx: number
+  total: number
+}) {
+  const { Icon, label, sub, accent } = panel
+  return (
+    <div
+      style={{
+        width: CARD_W,
+        height: CARD_H,
+        borderRadius: 20,
+        background: selected ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.04)',
+        border: selected ? '1px solid rgba(255,255,255,0.18)' : '1px solid rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(24px) saturate(160%)',
+        boxShadow: selected
+          ? `0 20px 60px rgba(0,0,0,0.5), 0 0 30px ${accent}35`
+          : '0 8px 24px rgba(0,0,0,0.35)',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '20px 16px',
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'background 300ms, border-color 300ms, box-shadow 300ms',
+      }}
+    >
+      {selected && (
+        <div style={{
+          position: 'absolute', top: -40, right: -40,
+          width: 120, height: 120, borderRadius: '50%',
+          background: `${accent}20`, filter: 'blur(40px)',
+          pointerEvents: 'none',
+        }} />
+      )}
+
+      <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.15em', marginBottom: 12 }}>
+        {String(idx + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: `${accent}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon style={{ width: 26, height: 26, color: accent }} />
+        </div>
+      </div>
+
+      <div>
+        <div style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 3 }}>{label}</div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{sub}</div>
+      </div>
+
+      {selected && (
+        <div style={{ position: 'absolute', bottom: 0, left: '20%', right: '20%', height: 2, borderRadius: 1, background: 'linear-gradient(90deg,#60A5FA,#F472B6)' }} />
+      )}
+    </div>
+  )
+}
+
