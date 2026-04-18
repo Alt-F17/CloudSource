@@ -7,6 +7,5 @@ node_modules
 .DS_Store
 dist
 build
-/public/cesium
 /drizzle
 next-env.d.ts
